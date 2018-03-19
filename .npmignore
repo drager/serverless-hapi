@@ -1,0 +1,7 @@
+dist/example
+node_modules
+src
+tsconfig.json
+tslint.json
+example
+.editorconfig

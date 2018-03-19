@@ -1,0 +1,25 @@
+{
+  "extends": ["tslint-immutable"],
+  "rules": {
+    "no-var-keyword": true,
+    "no-parameter-reassignment": true,
+    "typedef": [true, "call-signature"],
+    "readonly-keyword": true,
+    "readonly-array": true,
+    "no-let": true,
+    "no-object-mutation": true,
+    "no-delete": true,
+    "no-method-signature": true,
+    "no-this": true,
+    "no-class": true,
+    "no-mixed-interface": true,
+    "no-if-statement": true,
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "lowercase-last",
+        "named-imports-order": "lowercase-first"
+      }
+    ]
+  }
+}
