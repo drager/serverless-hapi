@@ -8,6 +8,7 @@ const app = () => {
   server.connection()
 
   server.register(Bell, error => {
+    if (error) throw error
     server.auth.strategy('facebook', 'bell', {
       provider: 'facebook',
       password: 'cookie_encryption_password_secure',
@@ -19,7 +20,6 @@ const app = () => {
       // and enable Client OAuth Login
       clientId: 'test',
       clientSecret: 'test',
-      location: server.info.uri,
     })
 
     server.route({

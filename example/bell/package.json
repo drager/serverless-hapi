@@ -4,7 +4,7 @@
   "description": "Serverless webpack example using Typescript",
   "main": "handler.js",
   "scripts": {
-		"start": "serverless offline start",
+    "start": "serverless offline start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
