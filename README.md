@@ -28,7 +28,7 @@ const app = () => {
 export const hello = serverlessHapi(app())
 ```
 
-For a complete example, check out the [example folder](https://github.com/drager/serverless-hapi/example).
+For more examples, check out the [example folder](https://github.com/drager/serverless-hapi/tree/master/example).
 
 ## Features and bugs
 
