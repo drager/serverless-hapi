@@ -70,7 +70,7 @@ export function serverlessHapi(
                 // because lambda usually set's these.
                 // We filter away them by default but this can be changed
                 // by setting the `filterHeaders option to false.
-                const headers = () => {
+                const getHeaders = () => {
                   const {
                     headers: {
                       ['content-encoding']: _,
@@ -82,6 +82,14 @@ export function serverlessHapi(
                   return options.filterHeaders ? headers : hapiResponse.headers
                 }
 
+                const headers = getHeaders()
+                const cookieHeader = headers['set-cookie']
+
+                // Lambda get's in trouble if we send back an array...
+                const setCookieHeader = Array.isArray(cookieHeader)
+                  ? cookieHeader[0]
+                  : cookieHeader
+
                 const data = {
                   statusCode,
                   body: options.stringifyBody
@@ -89,7 +97,7 @@ export function serverlessHapi(
                       ? body
                       : JSON.stringify(body)
                     : body,
-                  headers: headers(),
+                  headers: {...headers, ['set-cookie']: setCookieHeader},
                 }
 
                 const response = !callback ? {res: data} : data
