@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for hapi 17 :tada:.
 
 ### Breaking
-- No longer accepts a callback, a promise is returned instead
+- No longer accepts a callback, a promise is returned instead.
 - Works on nodejs 8.x and greater.
 
 ## [2.0.1] - 2018-09-25 
@@ -38,5 +38,7 @@ Both options default to true: `{filterHeaders: true, stringifyBody: true}`.
 
 Added a new example showing of usage of Bell.
 
-[Unreleased]: https://github.com/drager/serverless-hapi/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/drager/serverless-hapi/compare/v3.0.0...HEAD
 [2.0.0]: https://github.com/drager/serverless-hapi/compare/v1.0.0...v2.0.0
+[2.0.1]: https://github.com/drager/serverless-hapi/compare/v2.0.0...v2.0.1
+[3.0.0]: https://github.com/drager/serverless-hapi/compare/v2.0.1...v3.0.0
