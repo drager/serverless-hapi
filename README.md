@@ -2,6 +2,10 @@
 
 Use hapi with the [serverless framework](https://github.com/serverless/serverless).
 
+The latest version of `serverless-hapi` works with hapi >= 17.
+For usage with hapi 16, use version `2.0.x` of `serverless-hapi`.
+See [2.0.x branch](https://github.com/drager/serverless-hapi/tree/2.0.x).
+
 Works with Amazon Lambda and Azure Functions.
 
 ## Usage
