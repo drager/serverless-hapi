@@ -1,18 +1,20 @@
 {
   "name": "serverless-hapi",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Use hapi with the serverless framework",
   "main": "dist/src/index.js",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc"
+    "build": "tsc",
+    "watch": "tsc --watch"
   },
   "author": "Jesper Håkansson <jesper@jesperh.se>",
   "license": "Apache-2.0",
   "repository": "https://github.com/drager/serverless-hapi",
   "devDependencies": {
-    "@types/aws-lambda": "^0.0.33",
-    "@types/hapi": "^16.1.14",
+    "@types/aws-lambda": "^8.10.13",
+    "@types/hapi": "^17.0.15",
+    "@types/node": "8.10.30",
     "tslint": "^5.9.1",
     "tslint-immutable": "^4.5.2",
     "typescript": "^2.7.2"

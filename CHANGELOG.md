@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.0] - 2018-09-29
+### Added
+- Added support for hapi 17 :tada:.
+
+### Breaking
+- No longer accepts a callback, a promise is returned instead
+- Works on nodejs 8.x and greater.
+
+## [2.0.1] - 2018-09-25 
+
+### Fixed
+- Get first element if set-cookie's value is an array
+Bell set's a cookie called `set-cookie` that has an array
+as its value, this causes problem's for AWS lambda.
+
+This is fixed by extracting the first value from the array
+and just return the `set-cookie` value as a single value string.
+
 ## [2.0.0] - 2018-09-24
 ### Added
 Now headers and query parameters are passed through

@@ -1,46 +1,42 @@
-import {APIGatewayEvent, Context} from 'aws-lambda'
+import {APIGatewayEvent, Callback, Context} from 'aws-lambda'
 import * as Bell from 'bell'
 import * as hapi from 'hapi'
-import {serverlessHapi} from '../../src/index'
+import {serverlessHapi, ResponseData} from '../../src/index'
 
-const app = () => {
+const app = async (): Promise<hapi.Server> => {
   const server = new hapi.Server()
-  server.connection()
 
-  server.register(Bell, error => {
-    if (error) throw error
-    server.auth.strategy('facebook', 'bell', {
-      provider: 'facebook',
-      password: 'cookie_encryption_password_secure',
-      isSecure: false,
-      // You'll need to go to https://developers.facebook.com/ and set up a
-      // Website application to get started
-      // Once you create your app, fill out Settings and set the App Domains
-      // Under Settings >> Advanced, set the Valid OAuth redirect URIs to include http://<yourdomain.com>/bell/door
-      // and enable Client OAuth Login
-      clientId: 'test',
-      clientSecret: 'test',
-    })
+  await server.register(Bell)
 
-    server.route({
-      method: ['GET', 'POST'],
-      path: '/bell',
-      config: {
-        auth: {
-          strategy: 'facebook',
-          mode: 'try',
-        },
-        handler: (request, reply) => {
-          if (!request.auth.isAuthenticated) {
-            return reply({
+  server.auth.strategy('facebook', 'bell', {
+    provider: 'facebook',
+    password: 'cookie_encryption_password_secure',
+    isSecure: false,
+    // You'll need to go to https://developers.facebook.com/ and set up a
+    // Website application to get started
+    // Once you create your app, fill out Settings and set the App Domains
+    // Under Settings >> Advanced, set the Valid OAuth redirect URIs to include http://<yourdomain.com>/bell/door
+    // and enable Client OAuth Login
+    clientId: 'test',
+    clientSecret: 'test',
+  })
+
+  server.route({
+    method: ['GET', 'POST'],
+    path: '/bell',
+    options: {
+      auth: {
+        strategy: 'facebook',
+        mode: 'try',
+      },
+      handler: (request: any) =>
+        !request.auth.isAuthenticated
+          ? {
               error:
                 'Authentication failed due to: ' + request.auth.error.message,
-            })
-          }
-          return reply(request.auth.credentials)
-        },
-      },
-    })
+            }
+          : request.auth.credentials,
+    },
   })
   return server
 }
@@ -53,5 +49,13 @@ const onInitError = (error: Error) => {
 export const bell: (
   event: APIGatewayEvent,
   context: Context,
-  callback: (error?: Error | null | undefined, result?: any) => void
-) => void = serverlessHapi(app(), onInitError)
+  callback: Callback
+) => Promise<ResponseData | void> = async (event, context, _callback) => {
+  try {
+    const server = await app()
+
+    return serverlessHapi(server, onInitError)(event, context)
+  } catch (error) {
+    console.error(error)
+  }
+}
