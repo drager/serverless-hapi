@@ -6,10 +6,13 @@
   "scripts": {
     "start:aws": "serverless offline start",
     "start:azure": "npm run build:azure && func host start",
+    "start:gcp": "npm run build:gcp && ./node_modules/.bin/functions deploy bell --entry-point=bell --trigger-http --source=./bell",
     "build:azure": "serverless webpack && cp .webpack/service/handler.js bell/",
+    "build:gcp": "serverless webpack && cp .webpack/service/handler.js bell/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "@google-cloud/functions-emulator": "^1.0.0-beta.5",
     "@types/aws-lambda": "^0.0.33",
     "@types/node": "^8.0.57",
     "serverless-offline": "^3.18.0",

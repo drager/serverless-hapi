@@ -5,7 +5,10 @@ import {serverlessHapi} from '../../src/index'
 
 const app = () => {
   const server = new hapi.Server()
-  server.connection()
+  server.connection({
+    // Uncomment this line if you want to try it with Google Cloud Platform.
+    //uri: 'http://localhost:8010/1/us-central1/bell',
+  })
 
   server.register(Bell, error => {
     if (error) throw error
@@ -20,10 +23,15 @@ const app = () => {
       // and enable Client OAuth Login
       clientId: 'test',
       clientSecret: 'test',
+      // Uncomment this line if you want to try it with Google Cloud Platform.
+      //location: server.info.uri,
     })
 
     server.route({
       method: ['GET', 'POST'],
+      // Uncomment this line if you want to try it with Google Cloud Platform.
+      // and comment out the other path below.
+      //path: '/',
       path: '/bell',
       config: {
         auth: {
@@ -54,4 +62,12 @@ export const bell: (
   event: APIGatewayEvent,
   context: Context,
   callback: (error?: Error | null | undefined, result?: any) => void
-) => void = serverlessHapi(app(), onInitError)
+) => void = serverlessHapi(
+  app(),
+  onInitError
+  // Uncomment the lines below if you want to try it with Google Cloud Platform.
+  //{
+  //filterHeaders: true,
+  //stringifyBody: false,
+  //}
+)

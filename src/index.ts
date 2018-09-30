@@ -54,7 +54,7 @@ function setupServer({
   provider,
 }: {
   readonly server: Server
-  readonly callback: Callback
+  readonly callback: Callback | any
   readonly onInitError: OnInitError
   readonly userOptions: UserOptions
   readonly serverOptions: ServerOptions
@@ -108,14 +108,26 @@ function setupServer({
 
               const response = provider === Provider.AZURE ? {res: data} : data
 
-              callback(null, response)
+              provider === Provider.GCP
+                ? callback
+                    .set(data.headers)
+                    .status(data.statusCode)
+                    .send(data.body)
+                : callback(null, response)
             }
           )
   )
 }
 
-function getProvider(event: APIGatewayEvent | any): Provider {
-  return !!event.done ? Provider.AZURE : Provider.AWS
+function getProvider(
+  event: APIGatewayEvent | any,
+  context: Context | any
+): Provider {
+  return !!event.done
+    ? Provider.AZURE
+    : context.send
+      ? Provider.GCP
+      : Provider.AWS
 }
 
 export function serverlessHapi(
@@ -128,13 +140,21 @@ export function serverlessHapi(
   // https://github.com/hapijs/hapi/blob/v16/API.md#serverinitializecallback
   onInitError: OnInitError,
   userOptions: UserOptions = {filterHeaders: true, stringifyBody: true}
-): (event: APIGatewayEvent, context: Context, callback: Callback) => void {
-  return (event: APIGatewayEvent, _context: Context, callback: Callback) => {
-    const azEvent = event as any
+): (
+  event: APIGatewayEvent,
+  // We're not using context for AWS and Azure's but it's used for GCP.
+  context: Context | any,
+  callback: Callback
+) => void {
+  return (
+    event: APIGatewayEvent | any,
+    context: Context | any,
+    callback: Callback
+  ) => {
+    const provider = getProvider(event, context)
 
-    const provider = getProvider(event)
-
-    const queryStrings = event.queryStringParameters
+    const queryStrings =
+      provider === Provider.AWS ? event.queryStringParameters : event.query
 
     const defaultOptions = {
       method: event.httpMethod,
@@ -148,16 +168,24 @@ export function serverlessHapi(
         ? defaultOptions
         : provider === Provider.AZURE
           ? {
-              method: azEvent.req && azEvent.req.method,
-              url: buildFullUrl(event, queryStrings),
-              headers: azEvent.req && azEvent.req.headers,
-              payload: azEvent.req && azEvent.req.body,
+              ...defaultOptions,
+              method: event.req && event.req.method,
+              headers: event.req && event.req.headers,
+              payload: event.req && event.req.body,
             }
-          : defaultOptions
+          : {
+              ...defaultOptions,
+              method: event.method,
+            }
 
     setupServer({
       server,
-      callback: callback || azEvent.done,
+      callback:
+        provider === Provider.AWS
+          ? callback
+          : provider === Provider.AZURE
+            ? event.done
+            : context,
       onInitError,
       serverOptions,
       userOptions,

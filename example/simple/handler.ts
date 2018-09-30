@@ -8,6 +8,9 @@ const app = () => {
 
   server.route({
     method: 'GET',
+    // Uncomment this line if you want to try it with Google Cloud Platform.
+    // and comment out the other path below.
+    //path: '/',
     path: '/hello',
     handler: (_request, reply) => reply({message: 'Hello from hapi!'}),
   })
@@ -24,4 +27,12 @@ export const hello: (
   event: APIGatewayEvent,
   context: Context,
   callback: (error?: Error | null | undefined, result?: any) => void
-) => void = serverlessHapi(app(), onInitError)
+) => void = serverlessHapi(
+  app(),
+  onInitError
+  // Uncomment the lines below if you want to try it with Google Cloud Platform.
+  //{
+  //filterHeaders: true,
+  //stringifyBody: false,
+  //}
+)
