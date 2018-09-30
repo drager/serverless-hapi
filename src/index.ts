@@ -91,12 +91,15 @@ function setupServer({
         } = hapiResponse
         return userOptions.filterHeaders ? headers : hapiResponse.headers
       }
+
       const headers = getHeaders()
       const cookieHeader = headers['set-cookie']
+
       // Lambda get's in trouble if we send back an array...
       const setCookieHeader = Array.isArray(cookieHeader)
         ? cookieHeader[0]
         : cookieHeader
+
       const data = {
         statusCode,
         body: userOptions.stringifyBody
@@ -104,7 +107,9 @@ function setupServer({
             ? body
             : JSON.stringify(body)
           : body,
-        headers: {...headers, ['set-cookie']: setCookieHeader},
+        headers: !!setCookieHeader
+          ? {...headers, ['set-cookie']: setCookieHeader}
+          : headers,
       }
 
       return provider == Provider.AZURE ? {res: data} : data
