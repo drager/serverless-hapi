@@ -17,8 +17,8 @@ The example can be run for both **AWS** and **Azure**.
 
 ### Google Cloud Platform
 If you want to try out the example with GCP, then you need to comment out some code
-in the [handler.ts](https://github.com/drager/serverless-hapi/blob/2.0.x/example/bell/handler.ts).
-file, see the comments in there. After that, proceed with the steps below.
+in [handler.ts](https://github.com/drager/serverless-hapi/blob/2.0.x/example/bell/handler.ts).
+See the comments in the file for more information. After that, proceed with the steps below.
 
 1. Run `yarn install` to install dependencies.
 2. Run `./node_modules/.bin/functions start` to run the local development server. 
