@@ -3,7 +3,7 @@
 Example showing a simple example of using serverless-hapi.
 
 ## Run
-The example can be run for both **AWS** and **Azure**.
+The example can be run for **AWS**, **Azure** and **Google Cloud Platform**.
 
 ### AWS
 1. Run `yarn install` to install dependencies.
