@@ -10,6 +10,19 @@ export type OnInitError = (error: Error) => void
 
 type QueryStrings = {readonly [name: string]: string}
 
+type ServerOptions = {
+  readonly method: string
+  readonly url: string
+  readonly headers: {readonly [name: string]: string}
+  readonly payload: Object
+}
+
+enum Provider {
+  AWS,
+  AZURE,
+  GCP,
+}
+
 function buildQueryString(queryStrings: QueryStrings): string {
   return Object.keys(queryStrings)
     .map(key => `${key}=${queryStrings[key]}`)
@@ -38,12 +51,14 @@ function setupServer({
   onInitError,
   userOptions,
   serverOptions,
+  provider,
 }: {
   readonly server: Server
   readonly callback: Callback
   readonly onInitError: OnInitError
   readonly userOptions: UserOptions
-  readonly serverOptions: any
+  readonly serverOptions: ServerOptions
+  readonly provider: Provider
 }): void {
   server.initialize(
     error =>
@@ -84,19 +99,23 @@ function setupServer({
               const data = {
                 statusCode,
                 body: userOptions.stringifyBody
-                  ? typeof body === 'string'
+                  ? typeof body === 'string' || body === null
                     ? body
                     : JSON.stringify(body)
                   : body,
                 headers: {...headers, ['set-cookie']: setCookieHeader},
               }
 
-              const response = !callback ? {res: data} : data
+              const response = provider === Provider.AZURE ? {res: data} : data
 
               callback(null, response)
             }
           )
   )
+}
+
+function getProvider(event: APIGatewayEvent | any): Provider {
+  return !!event.done ? Provider.AZURE : Provider.AWS
 }
 
 export function serverlessHapi(
@@ -113,15 +132,36 @@ export function serverlessHapi(
   return (event: APIGatewayEvent, _context: Context, callback: Callback) => {
     const azEvent = event as any
 
+    const provider = getProvider(event)
+
     const queryStrings = event.queryStringParameters
 
-    const serverOptions = {
-      method: event.httpMethod || (azEvent.req && azEvent.req.method),
+    const defaultOptions = {
+      method: event.httpMethod,
       url: buildFullUrl(event, queryStrings),
-      headers: event.headers || (azEvent.req && azEvent.req.headers),
-      payload: event.body || (azEvent.req && azEvent.req.body),
+      headers: event.headers,
+      payload: event.body,
     }
 
-    setupServer({server, callback, onInitError, serverOptions, userOptions})
+    const serverOptions =
+      provider === Provider.AWS
+        ? defaultOptions
+        : provider === Provider.AZURE
+          ? {
+              method: azEvent.req && azEvent.req.method,
+              url: buildFullUrl(event, queryStrings),
+              headers: azEvent.req && azEvent.req.headers,
+              payload: azEvent.req && azEvent.req.body,
+            }
+          : defaultOptions
+
+    setupServer({
+      server,
+      callback: callback || azEvent.done,
+      onInitError,
+      serverOptions,
+      userOptions,
+      provider,
+    })
   }
 }
