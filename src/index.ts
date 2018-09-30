@@ -126,10 +126,7 @@ export function serverlessHapi(
   // https://github.com/hapijs/hapi/blob/v16/API.md#serverinitializecallback
   onInitError: OnInitError,
   userOptions: UserOptions = {filterHeaders: true, stringifyBody: true}
-): (
-  event: APIGatewayEvent,
-  context: Context
-) => Promise<ResponseData | void> {
+): (event: APIGatewayEvent, context: Context) => Promise<ResponseData | void> {
   return (event: APIGatewayEvent, _context: Context) => {
     const azEvent = event as any
 
@@ -137,14 +134,16 @@ export function serverlessHapi(
 
     const queryStrings = event.queryStringParameters
 
+    const defaultOptions = {
+      method: event.httpMethod,
+      url: buildFullUrl(event, queryStrings),
+      headers: event.headers,
+      payload: event.body,
+    }
+
     const serverOptions =
       provider === Provider.AWS
-        ? {
-            method: event.httpMethod,
-            url: buildFullUrl(event, queryStrings),
-            headers: event.headers || (azEvent.req && azEvent.req.headers),
-            payload: event.body || (azEvent.req && azEvent.req.body),
-          }
+        ? defaultOptions
         : provider === Provider.AZURE
           ? {
               method: azEvent.req && azEvent.req.method,
@@ -152,12 +151,7 @@ export function serverlessHapi(
               headers: azEvent.req && azEvent.req.headers,
               payload: azEvent.req && azEvent.req.body,
             }
-          : provider === Provider.GCP && {
-              method: null,
-              url: null,
-              headers: null,
-              payload: null,
-            }
+          : defaultOptions
 
     return setupServer({
       server,
