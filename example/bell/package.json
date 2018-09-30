@@ -4,12 +4,15 @@
   "description": "Serverless webpack example using Typescript",
   "main": "handler.js",
   "scripts": {
-    "start": "serverless offline start",
+    "start:aws": "serverless offline start",
+    "start:azure": "npm run build:azure && func host start",
+    "build:azure": "serverless webpack && cp .webpack/service/handler.js bell/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.13",
     "@types/node": "^8.10.30",
+    "azure-functions-core-tools": "^2.0.3",
     "serverless-offline": "^3.25.17",
     "serverless-webpack": "^4.0.0",
     "ts-loader": "^2.3.7",
