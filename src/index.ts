@@ -103,7 +103,9 @@ function setupServer({
                     ? body
                     : JSON.stringify(body)
                   : body,
-                headers: {...headers, ['set-cookie']: setCookieHeader},
+                headers: !!setCookieHeader
+                  ? {...headers, ['set-cookie']: setCookieHeader}
+                  : headers,
               }
 
               const response = provider === Provider.AZURE ? {res: data} : data
