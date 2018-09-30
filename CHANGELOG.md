@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.1] - 2018-09-30
+### Fixed
+- Return response data nested in res object for Azure functions.
+
 ## [3.0.0] - 2018-09-29
 ### Added
 - Added support for hapi 17 :tada:.
@@ -38,7 +42,8 @@ Both options default to true: `{filterHeaders: true, stringifyBody: true}`.
 
 Added a new example showing of usage of Bell.
 
-[Unreleased]: https://github.com/drager/serverless-hapi/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/drager/serverless-hapi/compare/v3.0.1...HEAD
 [2.0.0]: https://github.com/drager/serverless-hapi/compare/v1.0.0...v2.0.0
 [2.0.1]: https://github.com/drager/serverless-hapi/compare/v2.0.0...v2.0.1
 [3.0.0]: https://github.com/drager/serverless-hapi/compare/v2.0.1...v3.0.0
+[3.0.1]: https://github.com/drager/serverless-hapi/compare/v3.0.0...v3.0.1
