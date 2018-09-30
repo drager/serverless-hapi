@@ -4,7 +4,9 @@
   "description": "Serverless webpack example using Typescript",
   "main": "handler.js",
   "scripts": {
-    "start": "serverless offline start",
+    "start:aws": "serverless offline start",
+    "start:azure": "npm run build:azure && func host start",
+    "build:azure": "serverless webpack && cp .webpack/service/handler.js hello/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

@@ -1,0 +1,22 @@
+{
+  "disabled": false,
+  "scriptFile": "handler.js",
+  "entryPoint": "bell",
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}
