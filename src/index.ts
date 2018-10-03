@@ -1,5 +1,6 @@
 import {APIGatewayEvent, Context} from 'aws-lambda'
 import {Server} from 'hapi'
+import {Headers} from 'shot'
 
 export type UserOptions = {
   readonly filterHeaders?: boolean
@@ -8,10 +9,10 @@ export type UserOptions = {
 
 export type OnInitError = (error: Error) => void
 
-type Data = {
+export type Data = {
   readonly statusCode: number
   readonly body: string | object | undefined
-  readonly headers: {readonly [name: string]: string}
+  readonly headers: Headers
 }
 
 export type ResponseData =
@@ -25,8 +26,8 @@ type QueryStrings = {readonly [name: string]: string}
 type ServerOptions = {
   readonly method: string
   readonly url: string
-  readonly headers: {readonly [name: string]: string}
-  readonly payload: Object
+  readonly headers: Headers
+  readonly payload?: Object
 }
 
 enum Provider {
@@ -57,19 +58,68 @@ function buildFullUrl(
   return !!queryStrings ? `${url}?${buildQueryString(queryStrings)}` : url
 }
 
+function setupAws({
+  event,
+  server,
+  onInitError,
+  userOptions,
+}: {
+  readonly event: APIGatewayEvent
+  readonly server: Server
+  readonly onInitError: OnInitError
+  readonly userOptions: UserOptions
+}): Promise<ResponseData | Error> {
+  const queryStrings = event.queryStringParameters
+
+  const serverOptions = {
+    method: event.httpMethod,
+    url: buildFullUrl(event, queryStrings),
+    headers: event.headers,
+    payload: event.body !== null && event.body,
+  }
+
+  return setupServer({server, onInitError, userOptions, serverOptions})
+}
+
+async function setupAzure({
+  event,
+  server,
+  onInitError,
+  userOptions,
+}: {
+  readonly event: any
+  readonly server: Server
+  readonly onInitError: OnInitError
+  readonly userOptions: UserOptions
+}): Promise<ResponseData | Error> {
+  const queryStrings = event.query
+
+  const serverOptions = {
+    url: buildFullUrl(event, queryStrings),
+    method: event.req && event.req.method,
+    headers: event.req && event.req.headers,
+    payload: event.req && event.req.body,
+  }
+
+  return setupServer({
+    server,
+    onInitError,
+    userOptions,
+    serverOptions,
+  }).then(serverData => ({res: serverData as Data}))
+}
+
 function setupServer({
   server,
   onInitError,
   userOptions,
   serverOptions,
-  provider,
 }: {
   readonly server: Server
   readonly onInitError: OnInitError
   readonly userOptions: UserOptions
   readonly serverOptions: ServerOptions
-  readonly provider: Provider
-}): Promise<ResponseData | void> {
+}): Promise<Data | Error> {
   return server
     .initialize()
     .then(async () => {
@@ -92,7 +142,7 @@ function setupServer({
         return userOptions.filterHeaders ? headers : hapiResponse.headers
       }
 
-      const headers = getHeaders()
+      const headers: Headers = getHeaders()
       const cookieHeader = headers['set-cookie']
 
       // Lambda get's in trouble if we send back an array...
@@ -100,7 +150,7 @@ function setupServer({
         ? cookieHeader[0]
         : cookieHeader
 
-      const data = {
+      const data: Data = {
         statusCode,
         body: userOptions.stringifyBody
           ? typeof body === 'string'
@@ -112,9 +162,12 @@ function setupServer({
           : headers,
       }
 
-      return provider == Provider.AZURE ? {res: data} : data
+      return data
     })
-    .catch(onInitError)
+    .catch((error: Error) => {
+      onInitError(error)
+      return error
+    })
 }
 
 function getProvider(event: APIGatewayEvent | any): Provider {
@@ -131,41 +184,19 @@ export function serverlessHapi(
   // https://github.com/hapijs/hapi/blob/v16/API.md#serverinitializecallback
   onInitError: OnInitError,
   userOptions: UserOptions = {filterHeaders: true, stringifyBody: true}
-): (event: APIGatewayEvent, context: Context) => Promise<ResponseData | void> {
+): (event: APIGatewayEvent, context: Context) => Promise<ResponseData | Error> {
   return (event: APIGatewayEvent | any, _context: Context) => {
     const provider = getProvider(event)
 
-    const queryStrings =
-      provider === Provider.AWS ? event.queryStringParameters : event.query
+    const serverSettings = {event, server, onInitError, userOptions}
 
-    const defaultOptions = {
-      method: event.httpMethod,
-      url: buildFullUrl(event, queryStrings),
-      headers: event.headers,
-      payload: event.body,
+    switch (provider) {
+      case Provider.AWS:
+        return setupAws(serverSettings)
+      case Provider.AZURE:
+        return setupAzure(serverSettings)
+      default:
+        throw new Error('Provider not supported!')
     }
-
-    const serverOptions =
-      provider === Provider.AWS
-        ? defaultOptions
-        : provider === Provider.AZURE
-          ? {
-              ...defaultOptions,
-              method: event.req && event.req.method,
-              headers: event.req && event.req.headers,
-              payload: event.req && event.req.body,
-            }
-          : {
-              ...defaultOptions,
-              method: event.method,
-            }
-
-    return setupServer({
-      server,
-      onInitError,
-      serverOptions,
-      userOptions,
-      provider,
-    })
   }
 }

@@ -50,12 +50,13 @@ export const bell: (
   event: APIGatewayEvent,
   context: Context,
   callback: Callback
-) => Promise<ResponseData | void> = async (event, context, _callback) => {
+) => Promise<ResponseData> = async (event, context, _callback) => {
   try {
     const server = await app()
 
     return serverlessHapi(server, onInitError)(event, context)
   } catch (error) {
     console.error(error)
+    return error
   }
 }

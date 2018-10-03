@@ -38,7 +38,7 @@ export const hello: (
   event: APIGatewayEvent,
   context: Context,
   callback: Callback
-) => Promise<ResponseData | void> = serverlessHapi(app(), onInitError)
+) => Promise<ResponseData | Error> = serverlessHapi(app(), onInitError)
 ```
 
 For more examples, check out the [example folder](https://github.com/drager/serverless-hapi/tree/master/example).
