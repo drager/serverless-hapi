@@ -13,6 +13,7 @@
     "@types/aws-lambda": "^8.10.13",
     "@types/node": "^8.10.30",
     "azure-functions-core-tools": "^2.0.3",
+    "serverless": "^1.36.3",
     "serverless-offline": "^3.25.17",
     "serverless-webpack": "^4.0.0",
     "ts-loader": "^2.3.7",
