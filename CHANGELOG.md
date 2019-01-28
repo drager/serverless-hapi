@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.2] - 2019-01-28
+### Fixed
+- Only set `set-cookie` if truthy, this was always set before.
+- Some TypeScript warnings.
+- Use `event.query` for provides that are not AWS. (AWS uses `event.queryStringParameters`).
+
+### Refactor
+- Create on function for each provider instead of having a larger one.
+
 ## [3.0.1] - 2018-09-30
 ### Fixed
 - Return response data nested in res object for Azure functions.
@@ -47,3 +56,4 @@ Added a new example showing of usage of Bell.
 [2.0.1]: https://github.com/drager/serverless-hapi/compare/v2.0.0...v2.0.1
 [3.0.0]: https://github.com/drager/serverless-hapi/compare/v2.0.1...v3.0.0
 [3.0.1]: https://github.com/drager/serverless-hapi/compare/v3.0.0...v3.0.1
+[3.0.2]: https://github.com/drager/serverless-hapi/compare/v3.0.1...v3.0.2
